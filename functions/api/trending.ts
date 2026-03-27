@@ -3,7 +3,6 @@ interface Env {
 }
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-  // Try cache first
   try {
     const cached = await context.env.NEWS_CACHE.get('trending');
     if (cached) {
@@ -15,21 +14,20 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     // Cache miss
   }
 
-  // Default trending topics (in production, these would be computed from article data)
+  // Global trending topics
   const trending = [
-    { id: '1', title: 'IPL 2026 Auction', articleCount: 142, category: 'sports' },
-    { id: '2', title: 'Union Budget 2026', articleCount: 98, category: 'business' },
-    { id: '3', title: 'AI Revolution', articleCount: 87, category: 'technology' },
-    { id: '4', title: 'Stock Market Rally', articleCount: 76, category: 'business' },
-    { id: '5', title: 'Climate Summit 2026', articleCount: 63, category: 'world' },
-    { id: '6', title: 'EV Market Boom', articleCount: 54, category: 'technology' },
-    { id: '7', title: 'Startup Unicorns', articleCount: 48, category: 'business' },
-    { id: '8', title: 'Space Mission', articleCount: 41, category: 'science' },
+    { id: '1', title: 'Climate Summit 2026', articleCount: 156, category: 'world' },
+    { id: '2', title: 'AI Regulation', articleCount: 132, category: 'technology' },
+    { id: '3', title: 'Global Markets Rally', articleCount: 98, category: 'business' },
+    { id: '4', title: 'Champions League', articleCount: 87, category: 'sports' },
+    { id: '5', title: 'India Green Energy', articleCount: 76, category: 'india' },
+    { id: '6', title: 'SpaceX Launch', articleCount: 68, category: 'science' },
+    { id: '7', title: 'WHO Health Alert', articleCount: 54, category: 'health' },
+    { id: '8', title: 'Oscar Nominations', articleCount: 49, category: 'entertainment' },
   ];
 
   const json = JSON.stringify(trending);
 
-  // Cache for 15 minutes
   try {
     await context.env.NEWS_CACHE.put('trending', json, { expirationTtl: 900 });
   } catch {

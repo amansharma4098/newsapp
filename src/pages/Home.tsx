@@ -15,12 +15,9 @@ export default function Home() {
   const { add, remove, isBookmarked } = useBookmarks();
   const observerRef = useRef<HTMLDivElement>(null);
 
-  // Infinite scroll
   const handleObserver = useCallback(
     (entries: IntersectionObserverEntry[]) => {
-      if (entries[0].isIntersecting && hasMore && !loading) {
-        loadMore();
-      }
+      if (entries[0].isIntersecting && hasMore && !loading) loadMore();
     },
     [hasMore, loading, loadMore]
   );
@@ -33,108 +30,94 @@ export default function Home() {
     return () => observer.disconnect();
   }, [handleObserver]);
 
+  const toggleBookmark = (article: typeof articles[0]) => {
+    isBookmarked(article.id) ? remove(article.id) : add(article);
+  };
+
   return (
     <>
       <CategoryTabs active={category} onChange={setCategory} />
-
-      {/* Breaking News Banner */}
       {articles.length > 0 && <BreakingNews articles={articles} />}
 
-      <div className="max-w-7xl mx-auto px-4 py-4">
-        {/* Error State */}
+      <div className="max-w-7xl mx-auto px-4 py-5">
+        {/* Error */}
         {error && (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <WifiOff size={48} className="text-slate-300 dark:text-slate-700 mb-3" />
-            <p className="text-slate-500 font-medium mb-1">Unable to load news</p>
-            <p className="text-sm text-slate-400 mb-4">{error}</p>
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <WifiOff size={44} className="text-brand-200 mb-3" />
+            <p className="text-slate-600 font-semibold mb-1">Unable to load news</p>
+            <p className="text-sm text-slate-400 mb-5">{error}</p>
             <button
               onClick={refresh}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 transition-colors"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 transition-colors shadow-sm shadow-brand-500/20"
             >
               <RefreshCw size={14} />
-              Retry
+              Try again
             </button>
           </div>
         )}
 
-        {/* Loading State */}
+        {/* Loading */}
         {loading && articles.length === 0 && <FeedLoader />}
 
-        {/* News Feed */}
+        {/* Feed */}
         {articles.length > 0 && (
-          <div className="space-y-4">
-            {/* Featured Article */}
+          <div className="space-y-5">
+            {/* Featured */}
             <NewsCard
               article={articles[0]}
               variant="featured"
               isBookmarked={isBookmarked(articles[0].id)}
-              onBookmark={() =>
-                isBookmarked(articles[0].id)
-                  ? remove(articles[0].id)
-                  : add(articles[0])
-              }
+              onBookmark={() => toggleBookmark(articles[0])}
             />
 
-            {/* Ad after featured */}
             <AdBanner slot="home-top" format="leaderboard" />
 
-            {/* Grid Cards */}
+            {/* Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {articles.slice(1, 7).map((article) => (
                 <NewsCard
                   key={article.id}
                   article={article}
                   isBookmarked={isBookmarked(article.id)}
-                  onBookmark={() =>
-                    isBookmarked(article.id) ? remove(article.id) : add(article)
-                  }
+                  onBookmark={() => toggleBookmark(article)}
                 />
               ))}
             </div>
 
-            {/* Mid-feed Ad */}
+            {/* Mid Ad */}
             {articles.length > 7 && (
               <AdBanner slot="home-mid" format="rectangle" className="max-w-lg mx-auto" />
             )}
 
-            {/* Compact List */}
+            {/* More Stories */}
             {articles.length > 7 && (
-              <div className="bg-white dark:bg-slate-800/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-700/50">
-                <h2 className="font-display font-bold text-lg mb-2">More Stories</h2>
+              <div className="bg-white rounded-2xl border border-brand-100/60 p-5">
+                <h2 className="font-display font-bold text-lg text-slate-800 mb-1">More Stories</h2>
+                <p className="text-xs text-slate-400 mb-3">Latest from around the world</p>
                 {articles.slice(7).map((article, i) => (
                   <div key={article.id}>
                     <NewsCard
                       article={article}
                       variant="compact"
                       isBookmarked={isBookmarked(article.id)}
-                      onBookmark={() =>
-                        isBookmarked(article.id) ? remove(article.id) : add(article)
-                      }
+                      onBookmark={() => toggleBookmark(article)}
                     />
-                    {/* Ad every 5 compact items */}
                     {(i + 1) % 5 === 0 && i < articles.length - 8 && (
-                      <AdBanner
-                        slot={`home-inline-${i}`}
-                        format="banner"
-                        className="my-3"
-                      />
+                      <AdBanner slot={`inline-${i}`} format="banner" className="my-3" />
                     )}
                   </div>
                 ))}
               </div>
             )}
 
-            {/* Bottom Ad */}
             <AdBanner slot="home-bottom" format="leaderboard" />
 
-            {/* Loading more indicator */}
             {loading && articles.length > 0 && (
-              <div className="flex justify-center py-4">
-                <RefreshCw size={20} className="animate-spin text-primary-500" />
+              <div className="flex justify-center py-6">
+                <RefreshCw size={18} className="animate-spin text-brand-400" />
               </div>
             )}
 
-            {/* Infinite scroll trigger */}
             <div ref={observerRef} className="h-4" />
           </div>
         )}

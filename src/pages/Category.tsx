@@ -41,27 +41,37 @@ export default function CategoryPage() {
     return () => observer.disconnect();
   }, [handleObserver]);
 
+  const toggleBookmark = (article: typeof articles[0]) => {
+    isBookmarked(article.id) ? remove(article.id) : add(article);
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
-      <h1 className="font-display font-extrabold text-2xl mb-1">
+      <h1 className="font-display font-extrabold text-2xl text-slate-800 mb-1">
         {categoryTitles[category] || category}
       </h1>
-      <p className="text-sm text-slate-500 mb-6">Latest stories and updates</p>
+      <p className="text-sm text-slate-400 mb-6">Latest stories and updates</p>
 
       {loading && articles.length === 0 ? (
         <FeedLoader />
       ) : (
         <div className="space-y-4">
+          {articles.length > 0 && (
+            <NewsCard
+              article={articles[0]}
+              variant="featured"
+              isBookmarked={isBookmarked(articles[0].id)}
+              onBookmark={() => toggleBookmark(articles[0])}
+            />
+          )}
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {articles.map((article, i) => (
+            {articles.slice(1).map((article, i) => (
               <div key={article.id}>
                 <NewsCard
                   article={article}
-                  variant={i === 0 ? 'featured' : 'default'}
                   isBookmarked={isBookmarked(article.id)}
-                  onBookmark={() =>
-                    isBookmarked(article.id) ? remove(article.id) : add(article)
-                  }
+                  onBookmark={() => toggleBookmark(article)}
                 />
                 {i === 3 && <AdBanner slot={`cat-${category}`} format="banner" className="mt-4" />}
               </div>
@@ -69,8 +79,8 @@ export default function CategoryPage() {
           </div>
 
           {loading && (
-            <div className="flex justify-center py-4">
-              <RefreshCw size={20} className="animate-spin text-primary-500" />
+            <div className="flex justify-center py-6">
+              <RefreshCw size={18} className="animate-spin text-brand-400" />
             </div>
           )}
           <div ref={observerRef} className="h-4" />
